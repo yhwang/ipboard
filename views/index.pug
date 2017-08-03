@@ -1,0 +1,19 @@
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title #{title}
+    script(src='http://d3js.org/d3.v3.min.js' charset='utf-8')
+    style.
+      .nodeInfoTD {
+        font: 14px verdana;
+        background:#C4DAFF;
+        white-space: nowrap;
+      }
+
+      .nodeInfoTR:nth-child(even){background-color: #f2f2f2}
+  body
+    table(id='main')
+      tr(width='800px' height='600px')
+        th(width='200px') IP
+        th(width='600px') Timestamp
+

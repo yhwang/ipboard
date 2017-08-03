@@ -1,0 +1,5 @@
+---
+applications:
+ - name: humix-wireless-board
+   random-route: true
+   memory: 256M
