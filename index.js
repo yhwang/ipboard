@@ -5,8 +5,13 @@ const bodyParser = require('body-parser');
 const Cloudant = require('cloudant');
 const config = require('./config.json');
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
 
+// parse application/json
+app.use(bodyParser.json())
+
+// const services = cfenv.getAppEnv({vcapFile: 'vcap.json'}).getServices();
 const services = cfenv.getAppEnv().getServices();
 const dbCred = services[config.dbService] && services[config.dbService]['credentials'];
 var dbconn;
@@ -34,6 +39,13 @@ app.post('/add', function (req, res) {
   res.json({msg: 'OK'});
 });
 
+app.post('/purge', function (req, res) {
+  if (!!dbconn) {
+    purge();
+  }
+  res.json({msg: 'OK'});
+});
+
 
 var port = process.env.PORT || 3000;
 app.listen(port, function() {
@@ -53,6 +65,25 @@ app.listen(port, function() {
     });
   }
 });
+
+function purge(req, res) {
+  dbconn.find({
+    "selector": { "DateNum": { "$gt": 0 } },
+    "fields": [ "_id", "_rev" ],
+    "sort": [ { "DateNum": "desc" } ]
+  }, (err, result) => {
+    if (err) {
+      console.error(`can't query db: ${err.stack}`);
+    } else {
+      result.docs.shift();
+      if (result.docs.length != 0) {
+        result.docs.forEach((v) => {
+          dbconn.destroy(v._id, v._rev);
+        });
+      }
+    }
+  });
+}
 
 function renderIPTable(req, res) {
   dbconn.find({
